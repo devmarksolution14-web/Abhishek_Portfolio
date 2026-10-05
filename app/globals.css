@@ -1,0 +1,296 @@
+@import "tailwindcss";
+@import "lenis/dist/lenis.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ------------------------------------------------------------------
+   Design tokens
+   Change the accent colour here: --accent is used for fills/backgrounds,
+   --accent-ink is used when the accent is the colour of text (it is
+   darker in light mode so it keeps AA contrast).
+------------------------------------------------------------------- */
+:root {
+  --accent: #c6ff3d;
+  --accent-contrast: #0b0d12; /* text that sits on top of the accent */
+  --accent-ink: #4a7300; /* accent as a text colour on light backgrounds */
+
+  --bg: #f4f2ec;
+  --surface: #ffffff;
+  --border: #d9d6cc;
+  --text: #0b0d12;
+  --muted: #55534d;
+  --danger: #b42318;
+
+  --radius-card: 24px;
+  --container: 1200px;
+  --gutter: clamp(1rem, 4vw, 2.5rem);
+  --section-y: clamp(5rem, 12vw, 10rem);
+  --nav-h: 72px;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dark {
+  --accent-ink: var(--accent);
+  --bg: #0b0d12;
+  --surface: #10131a;
+  --border: #232733;
+  --text: #edebe6;
+  --muted: #a3a19b;
+  --danger: #ff8f80;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-danger: var(--danger);
+  --color-accent: var(--accent);
+  --color-accent-contrast: var(--accent-contrast);
+  --color-accent-ink: var(--accent-ink);
+
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  --radius-card: var(--radius-card);
+  --ease-out-expo: var(--ease-out);
+}
+
+/* ------------------------------------------------------------------
+   Base
+------------------------------------------------------------------- */
+@layer base {
+  html {
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: clamp(1rem, 0.95rem + 0.2vw, 1.0625rem);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: var(--accent);
+    color: var(--accent-contrast);
+  }
+  :focus-visible {
+    outline: 2px solid var(--accent-ink);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+  .dark :focus-visible {
+    outline-color: var(--accent);
+  }
+  img {
+    user-select: none;
+  }
+  [id] {
+    scroll-margin-top: calc(var(--nav-h) + 1rem);
+  }
+}
+
+/* ------------------------------------------------------------------
+   Fluid type scale
+------------------------------------------------------------------- */
+@utility text-hero {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.6rem, 1.1rem + 6.4vw, 6.25rem);
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+}
+@utility text-display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.25rem, 1.3rem + 4vw, 4.75rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+@utility text-h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.9rem, 1.3rem + 2.6vw, 3.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+}
+@utility text-h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.35rem, 1.15rem + 0.8vw, 1.85rem);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+@utility text-lead {
+  font-size: clamp(1.1rem, 1rem + 0.5vw, 1.35rem);
+  line-height: 1.55;
+}
+@utility text-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ------------------------------------------------------------------
+   Layout helpers
+------------------------------------------------------------------- */
+@utility container-page {
+  width: 100%;
+  max-width: calc(var(--container) + var(--gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+@utility section-y {
+  padding-block: var(--section-y);
+}
+
+/* ------------------------------------------------------------------
+   Animation helpers
+------------------------------------------------------------------- */
+
+/* Elements GSAP reveals are hidden until JS takes over, so there is no flash
+   of un-animated content. html.js is set by an inline script before paint.
+   Hero elements stay visible underneath the preloader on first visit (good
+   for LCP) and are only pre-hidden when the preloader is skipped. */
+html.js [data-reveal]:not([data-reveal="hero"]),
+html.js[data-preloaded] [data-reveal="hero"] {
+  visibility: hidden;
+}
+
+/* SplitText mask wrappers: keep descenders visible */
+.split-mask {
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+/* Preloader is skipped on repeat visits in this tab (set before paint). */
+html[data-preloaded] .preloader {
+  display: none;
+}
+
+/* The normal arrow stays everywhere; it's swapped for the custom cursor only
+   over interactive elements (while the custom cursor is running). */
+html.has-custom-cursor a,
+html.has-custom-cursor a *,
+html.has-custom-cursor button,
+html.has-custom-cursor button *,
+html.has-custom-cursor [role="button"],
+html.has-custom-cursor label,
+html.has-custom-cursor label *,
+html.has-custom-cursor select,
+html.has-custom-cursor summary,
+html.has-custom-cursor [data-cursor],
+html.has-custom-cursor [data-cursor] * {
+  cursor: none;
+}
+/* The navbar and mobile menu keep the regular hand pointer. */
+html.has-custom-cursor header :is(a, button),
+html.has-custom-cursor header :is(a, button) *,
+html.has-custom-cursor #mobile-menu :is(a, button),
+html.has-custom-cursor #mobile-menu :is(a, button) * {
+  cursor: pointer;
+}
+html.has-custom-cursor input,
+html.has-custom-cursor textarea {
+  cursor: text;
+}
+
+@keyframes scroll-cue {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+.scroll-cue-line {
+  animation: scroll-cue 1.8s var(--ease-out) infinite;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ------------------------------------------------------------------
+   Reduced motion: stop loops and long transitions everywhere.
+------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+  .scroll-cue-line {
+    animation: none;
+  }
+}
+
+html.scroll-locked,
+html.scroll-locked body {
+  overflow: hidden;
+}
+
+/* Arch frame: semicircular top, card-radius bottom. Percent radii avoid the
+   browser shrinking every corner when a "full" radius overflows. */
+.arch {
+  border-radius: 50% 50% var(--radius-card) var(--radius-card) / 40% 40% var(--radius-card) var(--radius-card);
+}
+
+/* ------------------------------------------------------------------
+   Work section layout: vertical stack by default, a horizontal row that
+   GSAP scrolls on large screens when motion is allowed.
+------------------------------------------------------------------- */
+.work-track {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: 1fr;
+  width: 100%;
+  max-width: calc(var(--container) + var(--gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+@media (min-width: 768px) {
+  .work-track {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  html.js .work-pin {
+    min-height: 100svh;
+    justify-content: center;
+    padding-block: calc(var(--nav-h) + 1rem) 2rem;
+  }
+  html.js .work-viewport {
+    overflow: hidden;
+  }
+  html.js .work-track {
+    display: flex;
+    width: max-content;
+    max-width: none;
+    margin-inline: 0;
+    gap: 1.5rem;
+    /* line the first card up with the page container */
+    padding-left: max(var(--gutter), calc((100vw - var(--container)) / 2));
+    padding-right: max(var(--gutter), calc((100vw - var(--container)) / 2));
+  }
+  html.js .work-track > li {
+    width: min(28rem, 34vw, 52svh);
+    flex-shrink: 0;
+  }
+}
